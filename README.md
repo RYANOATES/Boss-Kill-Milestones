@@ -42,8 +42,8 @@ Open this folder as a Gradle project in IntelliJ IDEA, then run the Gradle `run`
 The project is based on RuneLite's [official example plugin](https://github.com/runelite/example-plugin) and follows the [Plugin Hub guide](https://github.com/runelite/plugin-hub#creating-new-plugins).
 
 ## TO-DO: 
-MAYBE: GUI tracker average kill time?
-CHANGE: make Excluded Bosses field bigger
-ADD: GUI tracker timeout
-MAYBE: side panel? could track current boss(showing an image or 3d model) and show lifetime, this session, since plugin activation, average time(?)
-MAYBE: Compare friend totals and show small leaderboard in side panel? Underneath picture or 3d model of boss and the totals and average time?
+- MAYBE: GUI tracker average kill time?
+- CHANGE: make Excluded Bosses field bigger
+- ADD: GUI tracker timeout
+- MAYBE: side panel? could track current boss(showing an image or 3d model) and show lifetime, this session, since plugin activation, average time(?)
+- MAYBE: Compare friend totals and show small leaderboard in side panel? Underneath picture or 3d model of boss and the totals and average time?
