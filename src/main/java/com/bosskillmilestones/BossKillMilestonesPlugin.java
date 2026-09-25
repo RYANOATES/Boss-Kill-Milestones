@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 @Slf4j
 @PluginDescriptor(
 	name = "Boss Kill Milestones",
-	description = "Tracks boss kill milestones and celebrates them with jingles.",
-	tags = {"boss", "kill count", "milestone", "jingle"}
+	description = "Boss kill goals, escalating original jingles, progress tracking and a friends hiscore leaderboard.",
+	tags = {"boss", "kill count", "milestone", "jingle", "goals", "friends", "hiscores"}
 )
 public class BossKillMilestonesPlugin extends Plugin
 {
@@ -196,14 +196,23 @@ public class BossKillMilestonesPlugin extends Plugin
 		activeBoss = bossName;
 		refreshProgress();
 
-		if (isMilestone(sinceEnabled))
+		Integer target = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-" + key, int.class);
+		Integer celebrated = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, int.class);
+		boolean goalReached = Celebration.goalReached(target == null ? 0 : target, total, celebrated);
+		if (goalReached) configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, target);
+		Celebration celebration = Celebration.select(sinceEnabled, sessionKills.getOrDefault(key, 0),
+			config.sessionCelebrations().interval, goalReached);
+		if (celebration != null)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You've killed " + sinceEnabled + " " + bossName
+			String introduction = celebration == Celebration.GOAL ? "Personal goal reached: " + target + " " + bossName + "! "
+				: celebration == Celebration.SESSION ? "Session milestone: " + sessionKills.get(key) + " " + bossName + " this session! "
+				: celebration == Celebration.THOUSAND || celebration == Celebration.TWO_FIFTY ? celebration.title + "! " : "";
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", introduction + "You've killed " + sinceEnabled + " " + bossName
 				+ " since Boss Kill Milestones was enabled!" + (total == null ? " (lifetime total unconfirmed)"
 				: " (" + total + (estimated ? " estimated total)" : " total)")), null);
 			if (config.playMilestoneSound())
 			{
-				milestoneAudio.play(sinceEnabled);
+				milestoneAudio.play(celebration);
 			}
 		}
 	}
@@ -220,11 +229,6 @@ public class BossKillMilestonesPlugin extends Plugin
 			}
 		}
 		return false;
-	}
-
-	private static boolean isMilestone(int kills)
-	{
-		return kills == 10 || kills == 25 || (kills >= 50 && kills % 50 == 0);
 	}
 
 	private static boolean isBossKillCountMessage(String prefix, String suffix)
@@ -291,7 +295,11 @@ public class BossKillMilestonesPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (PROFILE_GROUP.equals(event.getGroup())) sidebar.requestUpdate();
+		if (PROFILE_GROUP.equals(event.getGroup()))
+		{
+			if ("syncDiagnostics".equals(event.getKey())) lastPanel = null;
+			sidebar.requestUpdate();
+		}
 	}
 
 	private void resetTransientState()
@@ -315,6 +323,8 @@ public class BossKillMilestonesPlugin extends Plugin
 			resetTransientState();
 			profile = current;
 			migrateNames();
+			// Seed existing completed goals without replaying them after an upgrade/login.
+			for (String boss : BossNames.all()) acknowledgeCompletedGoal(boss);
 		}
 		return true;
 	}
@@ -372,7 +382,9 @@ public class BossKillMilestonesPlugin extends Plugin
 			lastPanel = null;
 			return;
 		}
-		String boss = BossNames.known(Text.removeTags(title.getText()));
+		StringBuilder titleText = new StringBuilder();
+		appendText(title, titleText);
+		String boss = BossNames.known(Text.removeTags(titleText.toString()).trim());
 		StringBuilder text = new StringBuilder();
 		appendText(stats, text);
 		String fingerprint = boss + "\n" + text;
@@ -384,6 +396,13 @@ public class BossKillMilestonesPlugin extends Plugin
 		Integer total = BossStats.parse(text.toString());
 		if (boss == null || total == null)
 		{
+			log.debug("Lifetime sync skipped: boss title={}, statistics={}", titleText, text);
+			if (config.syncDiagnostics())
+			{
+				String observed = Text.removeTags(text.toString().replace("<br>", " | ")).replace('\n', ' ');
+				message("Could not sync " + Text.removeTags(titleText.toString()).trim()
+					+ ". Visible stats: " + observed.substring(0, Math.min(300, observed.length())));
+			}
 			return;
 		}
 		// Sync is a snapshot, never a kill event: do not modify milestone progress.
@@ -391,6 +410,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		configManager.setRSProfileConfiguration(PROFILE_GROUP, "estimated-total-" + BossNames.key(boss), total);
 		configManager.setRSProfileConfiguration(PROFILE_GROUP, "last-chat-" + BossNames.key(boss), total);
 		configManager.setRSProfileConfiguration(PROFILE_GROUP, "initial-sync", true);
+		acknowledgeCompletedGoal(boss);
 		activeBoss = boss;
 		refreshProgress();
 		message("Synced " + boss + ": " + total + " lifetime kills. Your milestone progress is unchanged.");
@@ -398,7 +418,12 @@ public class BossKillMilestonesPlugin extends Plugin
 
 	private static void appendText(Widget widget, StringBuilder output)
 	{
-		if (widget.isHidden())
+		appendText(widget, output, java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>()));
+	}
+
+	private static void appendText(Widget widget, StringBuilder output, java.util.Set<Widget> visited)
+	{
+		if (widget == null || !visited.add(widget) || widget.isHidden())
 		{
 			return;
 		}
@@ -407,14 +432,15 @@ public class BossKillMilestonesPlugin extends Plugin
 		{
 			output.append(value).append('\n');
 		}
-		Widget[] children = widget.getChildren();
-		if (children != null)
+		// getChildren() covers only dynamic children; do not omit static/nested text.
+		for (Widget[] children : new Widget[][]{widget.getChildren(), widget.getStaticChildren(), widget.getNestedChildren()})
 		{
+			if (children == null) continue;
 			for (Widget child : children)
 			{
 				if (child != null)
 				{
-					appendText(child, output);
+					appendText(child, output, visited);
 				}
 			}
 		}
@@ -481,7 +507,18 @@ public class BossKillMilestonesPlugin extends Plugin
 	{
 		if (!ready() || !BossNames.all().contains(boss) || goal < 0) return;
 		configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-" + BossNames.key(boss), goal);
+		configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + BossNames.key(boss), 0);
+		acknowledgeCompletedGoal(boss);
 		refreshProgress();
+	}
+
+	private void acknowledgeCompletedGoal(String boss)
+	{
+		String key = BossNames.key(boss);
+		Integer target = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-" + key, int.class);
+		Integer total = GrindProgress.total(progressFor(boss).total);
+		if (target != null && target > 0 && total != null && total >= target)
+			configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, target);
 	}
 
 	String rivalFor(String boss)

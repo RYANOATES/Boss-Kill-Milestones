@@ -46,16 +46,15 @@ final class MilestoneAudio
 
 	static String resourceFor(int kills)
 	{
-		if (kills == 10) return "/audio/birthday-party-horn.wav";
-		if (kills == 25) return "/audio/community-claps.wav";
-		return "/audio/wow-thats-amazing.wav";
+		Celebration celebration = Celebration.select(kills, 0, 0, false);
+		return celebration == null ? null : celebration.resource;
 	}
 
-	synchronized void play(int kills)
+	synchronized void play(Celebration celebration)
 	{
 		if (worker == null) return;
 		int requestedGeneration = generation;
-		worker.execute(() -> loadAndPlay(resourceFor(kills), requestedGeneration));
+		worker.execute(() -> loadAndPlay(celebration.resource, requestedGeneration));
 	}
 
 	private void loadAndPlay(String resource, int requestedGeneration)

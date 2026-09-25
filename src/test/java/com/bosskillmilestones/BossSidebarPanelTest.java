@@ -15,6 +15,13 @@ import static org.junit.Assert.*;
 
 public class BossSidebarPanelTest
 {
+	@Test public void rendersPluginHubIcon() throws Exception
+	{
+		BufferedImage icon = BossSidebarPanel.icon(48);
+		assertEquals(48, icon.getWidth());
+		assertEquals(48, icon.getHeight());
+		ImageIO.write(icon, "png", new File("build/plugin-icon.png"));
+	}
 	@Test public void rendersPanelAndUpdatesCounters() throws Exception
 	{
 		SwingUtilities.invokeAndWait(() -> {

@@ -7,7 +7,7 @@ Built for the long grind: the rare drop that refuses to appear, the collection-l
 
 Track your progress in a boss sidebar and a compact on-screen overlay, with records saved separately for each RuneScape profile.
 
-> **Development build:** this repository contains the plugin and its development launcher. Plugin Hub availability is not implied. The Varrock guard test option is currently enabled by default; switch it off for normal boss-only use.
+> **Release candidate:** Combat Achievements syncing has been confirmed working in-game by the author. This version adds original escalating jingles and is awaiting a final in-game celebration check. Plugin Hub availability is not implied. Guard testing is disabled by default for new installations; existing saved settings are retained.
 
 [Getting started](#getting-started) · [Features](#features) · [Settings](#settings) · [Counting and syncing](#counting-and-syncing) · [Troubleshooting](#troubleshooting) · [Development](#development)
 
@@ -21,9 +21,15 @@ A chat message and optional sound celebrate kills tracked while the plugin is en
 
 | Tracked kills for a boss | Celebration |
 | :--- | :--- |
-| 10 | Birthday party horn |
-| 25 | Community claps |
-| 50, 100, 150, and every further 50 | Wow, that's amazing |
+| First 10 | Little Victory — playful brass toot |
+| First 25 | Golden Steps — climbing chimes |
+| Every 50 | Little Victory — short encouragement |
+| Every 250 | Champion Fanfare — a bigger celebration |
+| Every 1,000 | Legendary Victory — the major fanfare |
+| Personal lifetime goal reached on a tracked kill | Goal Complete — a distinct sparkling finish |
+| Optional: every 10 or 25 session kills | Session Spark — a brief two-note cue |
+
+Only one celebration plays per kill. Priority is personal goal, 1,000, 250, 50, introductory milestone, then session encouragement. The 250/1,000 tiers use saved kills since activation, not lifetime totals, and continue repeating for long grinds. Session encouragement is off by default and counts separately for each boss during the session.
 
 For example, a 150-kill milestone with a confirmed lifetime total displays:
 
@@ -31,7 +37,7 @@ For example, a 150-kill milestone with a confirmed lifetime total displays:
 
 Milestones are separate for each boss. Existing lifetime kills are not replayed as celebrations when you first enable the plugin.
 
-Sounds are bundled as PCM WAV resources, including converted versions of the supplied MP3s. They use desktop audio independently of the game's sound slider. Turn off **Play milestone sound** to keep milestone chat messages without audio.
+All six sounds are original synthesised PCM WAV resources, created for this plugin without external samples. Their reproducible source is in [tools/generate_audio.py](tools/generate_audio.py); it is a development tool, never run by the plugin. They use desktop audio independently of the game's sound slider. Turn off **Play milestone sound** to mute all celebrations while keeping chat messages. See [asset notices](ASSET-NOTICES.md).
 
 ### Know exactly what your counters mean
 
@@ -53,7 +59,7 @@ To set a goal, select a boss in the sidebar, enter the desired **lifetime total*
 
 For example, if your lifetime total is 1,250 and you set a goal of 2,000, you have 750 kills to go. Goals survive restarts and are kept separately for each boss and account profile. An unknown total requires a sync before progress can be calculated; estimates remain labelled.
 
-Personal goals do not change the regular jingle schedule or trigger an additional goal-completion sound.
+Reaching a personal goal on a tracked kill triggers its own message and sound, once per target, even across restarts. It takes priority over another milestone on that kill. Setting an already-completed target or syncing an already-completed goal does not replay a celebration. Estimated lifetime totals can trigger the goal too and remain labelled as estimates. Reaching a goal does not reset your saved milestone count.
 
 ### A sidebar built around your current boss
 
@@ -128,11 +134,13 @@ Attacking a boss, syncing a total, and receiving a duplicate kill signal do not 
 | Always on GUI | Off | Show the overlay before the first kill and ignore idle timeout |
 | GUI timeout (minutes) | 5 | Hide the overlay after 1–60 minutes without a tracked kill |
 | Play milestone sound | On | Play the bundled sound at each regular milestone |
+| Session encouragement | Off | Optional short reward every 10 or 25 session kills per boss; higher celebrations take priority |
 | Friends hiscore leaderboard | Off | Opt into public hiscore lookups for your account and friends |
 | Loot backup | On | Use recognised server-loot events when a matching kill message is absent |
 | Initial sync reminder | On | Prompt at login until the first successful Combat Achievements sync for the profile |
 | Excluded bosses | None | Comma-separated boss names to omit from tracked milestones |
-| Varrock guard testing | On in this development build | Track level 21 surface Varrock Guards as a separate test target |
+| Varrock guard testing | Off | Track level 21 surface Varrock Guards as a separate test target |
+| Debug lifetime sync | Off | Report unreadable boss statistics in chat and debug logs for troubleshooting |
 
 Exclusions ignore capitalization and extra spaces and recognise supported boss aliases. For example: `Sarachnis, Vorkath`.
 
@@ -166,6 +174,8 @@ Open the individual boss's **Combat Achievements details**, with its kill count 
 Opening the overview does **not** sync every boss. Each boss needs its own displayed total. Only explicit kill/completion labels are accepted; task progress and personal-best times are ignored. If no sync confirmation appears, no total was imported.
 
 After the first successful sync, the initial reminder stops for that profile. Reopening a boss's details can refresh its saved total, including downward corrections. Backup kills advance an estimate once a baseline exists; later chat or sync totals replace the estimate.
+
+The reader checks visible dynamic, static, and nested text within the boss statistics widget. If the details screen does not sync, enable **Debug lifetime sync**, close and reopen the boss details, and report any diagnostic chat message. The reader still rejects ambiguous totals rather than guessing. This refers to **Combat Achievements**, not the regional Achievement Diaries. The author has confirmed the updated sync works in-game.
 
 ## Troubleshooting
 
@@ -234,7 +244,9 @@ Automated tests cover calculations and UI behaviour in isolation; they do not re
 - [ ] Check chat and backup detection count a supported kill once, not twice.
 - [ ] Check exclusions and the backup toggle.
 - [ ] Sync a boss total without increasing milestone or session counts.
-- [ ] Reach 10, 25, and 50 tracked kills and confirm the corresponding sounds.
+- [ ] Check the introductory, 50, 250, and 1,000 celebration tiers and confirm only one cue plays on an overlap.
+- [ ] Reach a nearby personal goal, then restart and confirm it does not celebrate again.
+- [ ] Check optional 10/25-session encouragement and master sound mute.
 - [ ] Check first-kill visibility, idle timeout, and always-on mode.
 - [ ] Set, reach, change, and clear a personal goal; verify persistence after restart.
 - [ ] Browse a different boss while the overlay continues following the active target.
@@ -248,13 +260,14 @@ Automated tests cover calculations and UI behaviour in isolation; they do not re
 These are suggestions, **not implemented features**:
 
 - Sound volume control and a preview button.
-- A small, optional notification when a personal goal is reached.
 - A visible last-refreshed time for friend comparisons.
 - Grouped settings and a more convenient boss exclusion picker.
 - Session recaps and average kill times where encounter timing is reliable.
-- A release-ready first-run setup and guard testing disabled by default.
+- A guided first-run setup.
 - Real in-game screenshots and a short demonstration clip for this README.
 
 ---
 
 **One more kill. One step closer.**
+
+Original plugin code is distributed under the [BSD-2-Clause licence](LICENSE). Third-party assets have separate terms; see [asset notices](ASSET-NOTICES.md).

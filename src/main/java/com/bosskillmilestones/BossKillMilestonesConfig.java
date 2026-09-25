@@ -8,6 +8,16 @@ import net.runelite.client.config.Range;
 @ConfigGroup("boss-kill-milestones")
 public interface BossKillMilestonesConfig extends Config
 {
+	@ConfigItem(keyName = "sessionCelebrations", name = "Session encouragement", description = "Optional short celebrations every 10 or 25 session kills per boss. Larger milestones and personal goals take priority.")
+	default SessionEncouragement sessionCelebrations() { return SessionEncouragement.OFF; }
+
+	enum SessionEncouragement
+	{
+		OFF(0), EVERY_10(10), EVERY_25(25);
+		final int interval;
+		SessionEncouragement(int interval) { this.interval = interval; }
+		@Override public String toString() { return interval == 0 ? "Off" : "Every " + interval + " kills"; }
+	}
 	@ConfigItem(keyName = "showGrindGoals", name = "Show goals on overlay", description = "Show milestone progress, personal goals and cached friend comparisons on the on-screen counter.")
 	default boolean showGrindGoals() { return true; }
 
@@ -41,8 +51,11 @@ public interface BossKillMilestonesConfig extends Config
 	@ConfigItem(keyName = "testGuard", name = "Varrock guard testing", description = "Track level 21 Guards in Varrock as a separate test target. Uses server loot even when boss loot backup is off.")
 	default boolean testGuard()
 	{
-		return true;
+		return false;
 	}
+
+	@ConfigItem(keyName = "syncDiagnostics", name = "Debug lifetime sync", description = "Report unreadable Combat Achievements boss statistics in chat and the debug log. Turn off after troubleshooting.")
+	default boolean syncDiagnostics() { return false; }
 
 	@ConfigItem(keyName = "lootBackup", name = "Loot backup", description = "Count recognised boss server-loot events when a kill-count message is missing.")
 	default boolean lootBackup()

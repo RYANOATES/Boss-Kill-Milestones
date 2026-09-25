@@ -5,6 +5,14 @@ import static org.junit.Assert.*;
 
 public class BossStatsTest
 {
+	@Test public void handlesLineBreakVariantsAndRejectsMalformedNumbers()
+	{
+		assertEquals(Integer.valueOf(1250), BossStats.parse("Kill Count:<BR/><col=fff>1,250</col><br />Best time: 1:30"));
+		assertEquals(Integer.valueOf(24), BossStats.parse("Kills:\r\n24\r\n"));
+		assertNull(BossStats.parse("Kills: 1,2,50"));
+		assertNull(BossStats.parse(null));
+		assertNull(BossStats.parse("Kills: 1,250\nCompletions: 100"));
+	}
 	@Test
 	public void readsLabelledTotalsIncludingZero()
 	{
