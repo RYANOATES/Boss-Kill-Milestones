@@ -39,6 +39,8 @@ Milestones are separate for each boss. Existing lifetime kills are not replayed 
 
 All six sounds are original synthesised PCM WAV resources, created for this plugin without external samples. Their reproducible source is in [tools/generate_audio.py](tools/generate_audio.py); it is a development tool, never run by the plugin. They use desktop audio independently of the game's sound slider. Turn off **Play milestone sound** to mute all celebrations while keeping chat messages. See [asset notices](ASSET-NOTICES.md).
 
+Playback uses RuneLite's `AudioPlayer` on a background worker. Disabling the plugin cancels queued playback; a cue already handed to RuneLite may finish naturally (all cues are under six seconds). Muting prevents future cues, rather than interrupting one already playing.
+
 ### Know exactly what your counters mean
 
 | Counter | What it measures | Persistence |

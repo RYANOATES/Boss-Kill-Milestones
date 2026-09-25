@@ -1,14 +1,10 @@
 package com.bosskillmilestones;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.inject.Singleton;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineEvent;
+import javax.inject.Inject;
+import net.runelite.client.audio.AudioPlayer;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -16,8 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 final class MilestoneAudio
 {
 	private ExecutorService worker;
-	private Clip playing;
+	private final AudioPlayer audioPlayer;
 	private int generation;
+
+	@Inject
+	MilestoneAudio(AudioPlayer audioPlayer)
+	{
+		this.audioPlayer = audioPlayer;
+	}
 
 	synchronized void start()
 	{
@@ -37,11 +39,6 @@ final class MilestoneAudio
 			worker.shutdownNow();
 			worker = null;
 		}
-		if (playing != null)
-		{
-			playing.close();
-			playing = null;
-		}
 	}
 
 	static String resourceFor(int kills)
@@ -59,34 +56,18 @@ final class MilestoneAudio
 
 	private void loadAndPlay(String resource, int requestedGeneration)
 	{
-		Clip clip = null;
-		try (InputStream input = MilestoneAudio.class.getResourceAsStream(resource))
+		synchronized (this)
 		{
-			if (input == null) throw new IllegalStateException("Missing sound: " + resource);
-			try (AudioInputStream audio = AudioSystem.getAudioInputStream(new BufferedInputStream(input)))
-			{
-				clip = AudioSystem.getClip();
-				clip.open(audio);
-			}
-			synchronized (this)
-			{
-				if (worker == null || generation != requestedGeneration)
-				{
-					clip.close();
-					return;
-				}
-				if (playing != null) playing.close();
-				playing = clip;
-				Clip active = clip;
-				clip.addLineListener(event -> {
-					if (event.getType() == LineEvent.Type.STOP) active.close();
-				});
-				clip.start();
-			}
+			if (worker == null || generation != requestedGeneration) return;
+		}
+		try
+		{
+			// Resource decoding and playback stay off the client thread. RuneLite owns
+			// the audio line lifecycle; an already-started cue finishes naturally.
+			audioPlayer.play(MilestoneAudio.class, resource, 0f);
 		}
 		catch (Exception ex)
 		{
-			if (clip != null) clip.close();
 			log.warn("Could not play milestone sound {}", resource, ex);
 		}
 	}
