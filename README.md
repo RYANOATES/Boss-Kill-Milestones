@@ -1,10 +1,10 @@
-# Boss Kill Milestones
+# Boss Milestones: Rank Among Friends
 
-**Make every grind count.** Celebrate boss kills with original jingles, set personal goals, and compete with friends—all from a compact overlay and boss sidebar.
+Compare boss kills with friends, climb the leaderboard, and celebrate milestones.
 
 ## Getting started
 
-1. Search for **Boss Kill Milestones** in RuneLite's **Plugin Hub** and install it.
+1. Search for **Boss Milestones: Rank Among Friends** in RuneLite's **Plugin Hub** and install it.
 2. Keep the game's boss kill-count messages enabled.
 3. Click the **gold skull** sidebar icon to view your progress or select a boss.
 4. Open a boss's **Combat Achievements details** to sync its lifetime kill count.

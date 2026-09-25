@@ -1,6 +1,6 @@
 # Update checklist
 
-Boss Kill Milestones is published. Use this checklist when preparing future updates.
+Boss Milestones: Rank Among Friends is published. Use this checklist when preparing future updates.
 
 ## Prepared
 

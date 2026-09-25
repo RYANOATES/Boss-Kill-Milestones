@@ -66,7 +66,7 @@ final class BossSidebar
 					if (Objects.equals(account, configManager.getRSProfileKey())) { plugin.saveGoal(boss, goal); update(); }
 				});
 			});
-			navigation = NavigationButton.builder().tooltip("Boss Kill Milestones")
+			navigation = NavigationButton.builder().tooltip("Boss Milestones: Rank Among Friends")
 				.icon(BossSidebarPanel.icon(24)).priority(7).panel(panel).build();
 			toolbar.addNavigation(navigation);
 			clientThread.invokeLater(() -> {

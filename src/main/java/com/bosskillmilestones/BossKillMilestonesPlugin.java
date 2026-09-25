@@ -29,9 +29,10 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Boss Kill Milestones",
-	description = "Boss kill goals, escalating original jingles, progress tracking and a friends hiscore leaderboard.",
-	tags = {"boss", "kill count", "milestone", "jingle", "goals", "friends", "hiscores"}
+	name = "Boss Milestones: Rank Among Friends",
+	description = "Compare boss kills with friends, climb the leaderboard, and celebrate milestones.",
+	tags = {"boss", "bossing", "pvm", "kills", "killcount", "kc", "milestones", "friends", "leaderboard",
+		"hiscores", "highscores", "rankings", "goals", "progress", "tracker", "overlay", "jingles"}
 )
 public class BossKillMilestonesPlugin extends Plugin
 {
@@ -105,7 +106,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		milestoneAudio.start();
 		overlayManager.add(overlay);
 		sidebar.start();
-		log.debug("Boss Kill Milestones started");
+		log.debug("Boss Milestones: Rank Among Friends started");
 	}
 
 	@Override
@@ -117,7 +118,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		clearSession();
 		resetTransientState();
 		profile = null;
-		log.debug("Boss Kill Milestones stopped");
+		log.debug("Boss Milestones: Rank Among Friends stopped");
 	}
 
 	@Subscribe
@@ -208,7 +209,7 @@ public class BossKillMilestonesPlugin extends Plugin
 				: celebration == Celebration.SESSION ? "Session milestone: " + sessionKills.get(key) + " " + bossName + " this session! "
 				: celebration == Celebration.THOUSAND || celebration == Celebration.TWO_FIFTY ? celebration.title + "! " : "";
 			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", introduction + "You've killed " + sinceEnabled + " " + bossName
-				+ " since Boss Kill Milestones was enabled!" + (total == null ? " (lifetime total unconfirmed)"
+				+ " since Boss Milestones: Rank Among Friends was enabled!" + (total == null ? " (lifetime total unconfirmed)"
 				: " (" + total + (estimated ? " estimated total)" : " total)")), null);
 			if (config.playMilestoneSound())
 			{
@@ -448,7 +449,7 @@ public class BossKillMilestonesPlugin extends Plugin
 
 	private void message(String text)
 	{
-		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Boss Kill Milestones: " + text, null);
+		client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Boss Milestones: Rank Among Friends: " + text, null);
 	}
 
 	@Subscribe
