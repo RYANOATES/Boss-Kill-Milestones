@@ -268,9 +268,15 @@ final class BossSidebarPanel extends PluginPanel
 		g.setColor(ColorScheme.DARK_GRAY_COLOR);
 		g.fillOval(7, 8, 4, 4);
 		g.fillOval(13, 8, 4, 4);
-		g.drawLine(11, 17, 11, 20);
-		g.drawLine(14, 17, 14, 20);
+		// Filled, equally spaced gaps keep the three teeth centred on the skull.
+		g.fillRect(10, 17, 1, 3);
+		g.fillRect(13, 17, 1, 3);
 		g.dispose();
+		// Mirror the raster too, avoiding one-pixel antialiasing differences at
+		// the small toolbar size as well as in the larger boss placeholder.
+		for (int y = 0; y < size; y++)
+			for (int x = 0; x < size / 2; x++)
+				image.setRGB(size - 1 - x, y, image.getRGB(x, y));
 		return image;
 	}
 }

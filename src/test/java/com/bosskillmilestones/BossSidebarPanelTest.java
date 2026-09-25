@@ -15,6 +15,17 @@ import static org.junit.Assert.*;
 
 public class BossSidebarPanelTest
 {
+	@Test public void skullIsPixelSymmetricalAtEveryDisplaySize()
+	{
+		for (int size : new int[]{24, 48, 96})
+		{
+			BufferedImage icon = BossSidebarPanel.icon(size);
+			for (int y = 0; y < size; y++)
+				for (int x = 0; x < size / 2; x++)
+					assertEquals("Symmetry at " + size + "px: " + x + "," + y,
+						icon.getRGB(x, y), icon.getRGB(size - 1 - x, y));
+		}
+	}
 	@Test public void rendersPluginHubIcon() throws Exception
 	{
 		BufferedImage icon = BossSidebarPanel.icon(48);

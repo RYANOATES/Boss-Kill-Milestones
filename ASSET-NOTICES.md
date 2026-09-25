@@ -17,7 +17,7 @@ Audio files live in `src/main/resources/audio`. The reproducible composition and
 
 ## Retired third-party audio
 
-Earlier development revisions used Birthday Party Horn by Universfield, Crowd Cheering by storegraphic (trimmed and sped up by the author), and Wow that's amazing - Girl by Lucy_voice_character from Pixabay. Those recordings and their converted copies have been removed from the current source tree and are not included in the release candidate. Local originals were preserved outside the plugin repository.
+Earlier development revisions used Birthday Party Horn by Universfield, Crowd Cheering by storegraphic (trimmed and sped up by the author), and Wow that's amazing - Girl by Lucy_voice_character from Pixabay. Those recordings and their converted copies have been removed from the current source tree and are not included in the current version. Local originals were preserved outside the plugin repository.
 
 Previous public commits may still contain those recordings. Their original terms remain separate from this project's licence; replacing them does not retroactively relicense or remove historical copies.
 
