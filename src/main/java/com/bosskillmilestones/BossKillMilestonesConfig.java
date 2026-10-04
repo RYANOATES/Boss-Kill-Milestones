@@ -3,11 +3,15 @@ package com.bosskillmilestones;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
 
 @ConfigGroup("boss-kill-milestones")
 public interface BossKillMilestonesConfig extends Config
 {
+	@ConfigSection(name = "Debug", description = "Testing and troubleshooting options", position = 100, closedByDefault = true)
+	String debugSection = "debug";
+
 	@ConfigItem(keyName = "sessionCelebrations", name = "Session encouragement", description = "Optional short celebrations every 10 or 25 session kills per boss. Larger milestones and personal goals take priority.")
 	default SessionEncouragement sessionCelebrations() { return SessionEncouragement.OFF; }
 
@@ -48,13 +52,13 @@ public interface BossKillMilestonesConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "testGuard", name = "Varrock guard testing", description = "Track level 21 Guards in Varrock as a separate test target. Uses server loot even when boss loot backup is off.")
+	@ConfigItem(keyName = "testGuard", name = "Varrock guard testing", description = "Track level 21 Guards in Varrock as a separate test target. Uses server loot even when boss loot backup is off.", section = debugSection, position = 0)
 	default boolean testGuard()
 	{
 		return false;
 	}
 
-	@ConfigItem(keyName = "syncDiagnostics", name = "Debug lifetime sync", description = "Report unreadable Combat Achievements boss statistics in chat and the debug log. Turn off after troubleshooting.")
+	@ConfigItem(keyName = "syncDiagnostics", name = "Debug lifetime sync", description = "Report unreadable Combat Achievements boss statistics in chat and the debug log. Turn off after troubleshooting.", section = debugSection, position = 1)
 	default boolean syncDiagnostics() { return false; }
 
 	@ConfigItem(keyName = "lootBackup", name = "Loot backup", description = "Count recognised boss server-loot events when a kill-count message is missing.")

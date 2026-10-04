@@ -77,7 +77,7 @@ public class BossKillMilestonesPlugin extends Plugin
 	{
 		return overlayActivity.visible(config.alwaysOnGui(), config.guiTimeoutMinutes());
 	}
-	private static final Pattern KILL_COUNT_PATTERN = Pattern.compile(
+	static final Pattern KILL_COUNT_PATTERN = Pattern.compile(
 		"Your (?<prefix>completion count for |subdued |completed )?(?:<col=[0-9a-f]{6}>)?(?<boss>.+?)(?:</col>)? "
 			+ "(?<suffix>(?:(?:kill|harvest|lap|completion|success|Total Ticket) )?(?:count )?)is: ?"
 			+ "(?:<col=[0-9a-f]{6}>|@.+?@)(?<total>[0-9,]+)</col>");
@@ -134,7 +134,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		}
 
 		Matcher matcher = KILL_COUNT_PATTERN.matcher(event.getMessage());
-		if (!matcher.find() || !isBossKillCountMessage(matcher.group("prefix"), matcher.group("suffix")))
+		if (!matcher.find() || !isBossKillCountMessage(matcher.group("boss"), matcher.group("prefix"), matcher.group("suffix")))
 		{
 			return;
 		}
@@ -232,8 +232,14 @@ public class BossKillMilestonesPlugin extends Plugin
 		return false;
 	}
 
-	private static boolean isBossKillCountMessage(String prefix, String suffix)
+	static boolean isBossKillCountMessage(String boss, String prefix, String suffix)
 	{
+		// Barrows reports "Your Barrows chest count is", not a kill count.
+		// Restrict this exception to Barrows rather than accepting arbitrary counts.
+		if ("Barrows Chests".equals(BossNames.known(Text.removeTags(boss))) && "count ".equals(suffix))
+		{
+			return true;
+		}
 		return (suffix != null && (suffix.contains("kill count")
 			|| suffix.contains("completion count")
 			|| suffix.contains("success count")))
