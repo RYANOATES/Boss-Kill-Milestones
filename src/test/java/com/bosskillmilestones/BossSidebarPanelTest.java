@@ -15,15 +15,27 @@ import static org.junit.Assert.*;
 
 public class BossSidebarPanelTest
 {
-	@Test public void skullIsPixelSymmetricalAtEveryDisplaySize()
+	@Test public void artworkLoadsAtEveryDisplaySize()
 	{
 		for (int size : new int[]{24, 48, 96})
 		{
 			BufferedImage icon = BossSidebarPanel.icon(size);
+			assertEquals(size, icon.getWidth());
+			assertEquals(size, icon.getHeight());
+			assertTrue(icon.getColorModel().hasAlpha());
+			assertEquals(0, icon.getRGB(0, 0) >>> 24);
+			int redPixels = 0;
+			int goldPixels = 0;
 			for (int y = 0; y < size; y++)
-				for (int x = 0; x < size / 2; x++)
-					assertEquals("Symmetry at " + size + "px: " + x + "," + y,
-						icon.getRGB(x, y), icon.getRGB(size - 1 - x, y));
+				for (int x = 0; x < size; x++)
+				{
+					java.awt.Color color = new java.awt.Color(icon.getRGB(x, y), true);
+					if (color.getAlpha() < 128) continue;
+					if (color.getRed() > 150 && color.getGreen() < 100) redPixels++;
+					if (color.getRed() > 150 && color.getGreen() > 100 && color.getBlue() < 150) goldPixels++;
+				}
+			assertTrue("Red skull remains visible", redPixels > size);
+			assertTrue("Gold podium remains visible", goldPixels > size);
 		}
 	}
 	@Test public void rendersPluginHubIcon() throws Exception

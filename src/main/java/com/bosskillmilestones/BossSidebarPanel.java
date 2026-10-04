@@ -14,10 +14,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.util.ImageUtil;
 
 final class BossSidebarPanel extends PluginPanel
 {
 	private static final String FOLLOW = "Follow current boss";
+	private static final BufferedImage ICON = ImageUtil.loadImageResource(BossSidebarPanel.class, "/boss-milestones-icon.png");
 	private final JLabel title = new JLabel("Choose a boss", SwingConstants.CENTER);
 	private final JLabel image = new JLabel(new ImageIcon(icon(96)), SwingConstants.CENTER);
 	private final JLabel total = new JLabel("Unknown");
@@ -260,23 +262,9 @@ final class BossSidebarPanel extends PluginPanel
 	{
 		BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = image.createGraphics();
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.scale(size / 24.0, size / 24.0);
-		g.setColor(new Color(255, 190, 80));
-		g.fillRoundRect(5, 3, 14, 14, 7, 7);
-		g.fillRect(8, 15, 8, 5);
-		g.setColor(ColorScheme.DARK_GRAY_COLOR);
-		g.fillOval(7, 8, 4, 4);
-		g.fillOval(13, 8, 4, 4);
-		// Filled, equally spaced gaps keep the three teeth centred on the skull.
-		g.fillRect(10, 17, 1, 3);
-		g.fillRect(13, 17, 1, 3);
+		g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+		g.drawImage(ICON, 0, 0, size, size, null);
 		g.dispose();
-		// Mirror the raster too, avoiding one-pixel antialiasing differences at
-		// the small toolbar size as well as in the larger boss placeholder.
-		for (int y = 0; y < size; y++)
-			for (int x = 0; x < size / 2; x++)
-				image.setRGB(size - 1 - x, y, image.getRGB(x, y));
 		return image;
 	}
 }
