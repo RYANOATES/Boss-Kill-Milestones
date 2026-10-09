@@ -15,6 +15,9 @@ public interface BossKillMilestonesConfig extends Config
 	@ConfigItem(keyName = "sessionCelebrations", name = "Session encouragement", description = "Optional short celebrations every 10 or 25 session kills per boss. Larger milestones and personal goals take priority.")
 	default SessionEncouragement sessionCelebrations() { return SessionEncouragement.OFF; }
 
+	@ConfigItem(keyName = "milestoneFireworks", name = "Milestone fireworks", description = "Show a brief on-screen firework celebration when a milestone is reached. Larger milestones show bigger displays.")
+	default boolean milestoneFireworks() { return true; }
+
 	enum SessionEncouragement
 	{
 		OFF(0), EVERY_10(10), EVERY_25(25);

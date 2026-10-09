@@ -95,6 +95,8 @@ public class BossKillMilestonesPlugin extends Plugin
 	@Inject
 	private BossMilestoneOverlay overlay;
 	@Inject
+	private FireworksOverlay fireworksOverlay;
+	@Inject
 	private MilestoneAudio milestoneAudio;
 	@Inject
 	private BossSidebar sidebar;
@@ -105,6 +107,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		clearSession();
 		milestoneAudio.start();
 		overlayManager.add(overlay);
+		overlayManager.add(fireworksOverlay);
 		sidebar.start();
 		log.debug("Boss Milestones: Rank Among Friends started");
 	}
@@ -114,6 +117,7 @@ public class BossKillMilestonesPlugin extends Plugin
 	{
 		sidebar.stop();
 		overlayManager.remove(overlay);
+		overlayManager.remove(fireworksOverlay);
 		milestoneAudio.stop();
 		clearSession();
 		resetTransientState();
@@ -205,6 +209,10 @@ public class BossKillMilestonesPlugin extends Plugin
 			config.sessionCelebrations().interval, goalReached);
 		if (celebration != null)
 		{
+			if (config.milestoneFireworks())
+			{
+				fireworksOverlay.launch(celebration);
+			}
 			String introduction = celebration == Celebration.GOAL ? "Personal goal reached: " + target + " " + bossName + "! "
 				: celebration == Celebration.SESSION ? "Session milestone: " + sessionKills.get(key) + " " + bossName + " this session! "
 				: celebration == Celebration.THOUSAND || celebration == Celebration.TWO_FIFTY ? celebration.title + "! " : "";

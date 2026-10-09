@@ -15,6 +15,7 @@ Compare boss kills with friends, climb the leaderboard, and celebrate milestones
 - **Three kill counters:** this session, since the plugin was enabled, and lifetime total.
 - **Personal goals:** set a lifetime target for each boss, with a progress bar and completion celebration. Enter **0** to clear a goal.
 - **Escalating jingles:** bigger milestones earn bigger celebrations.
+- **Milestone fireworks:** colourful bursts appear across the game view when a milestone is reached. Bigger milestones bring larger displays, and personal goals trigger fireworks too.
 - **Friends leaderboard:** compare public boss kills with your actual friends list, including offline friends. Your own row is highlighted in green.
 - **Friend to beat:** see how many kills you need to overtake the next friend.
 - **Saved progress:** goals and tracked kills persist per boss and account profile across restarts.
@@ -36,6 +37,7 @@ Milestones use **kills tracked since activation**, not historical lifetime kills
 ## Make it yours
 
 - **Play milestone sound:** mute celebrations while keeping chat messages.
+- **Milestone fireworks:** turn the on-screen display on or off; enabled by default.
 - **Session encouragement:** optional rewards every 10 or 25 session kills.
 - **Always on GUI:** keep the overlay visible before your first kill and while idle.
 - **GUI timeout:** hide the overlay after 1–60 minutes without a kill; default **5 minutes**.
