@@ -31,6 +31,8 @@ Historical sources:
 
 The red boss skull, gold crown and leaderboard podium icon was created with OpenAI's image generation tool, using the supplied Slayer Task Odds icon as a style reference. Optimised PNG versions are included at `icon.png` (48 pixels, Plugin Hub) and `src/main/resources/boss-milestones-icon.png` (96 pixels, sidebar and placeholder). The project's BSD-2-Clause licence applies to the generated artwork to the extent rights apply.
 
+The README hero banner (`docs/images/boss-milestones-banner.png`) and annotated walkthrough graphics (`docs/images/side-panel-guide.png`, `docs/images/settings-guide.png`) are original artwork generated with OpenAI's image generation tool to match the plugin icon and burgundy-and-gold theme. The annotated guides are illustrative explanations based on the plugin author's screenshots; the original, unaltered screenshots are also retained as `docs/images/sidebar-preview.png` and `docs/images/settings-preview.png`. The project's BSD-2-Clause licence applies to the generated artwork to the extent rights apply.
+
 Boss sprites are obtained from the running game through RuneLite's sprite API, not distributed as copied image resources or relicensed by this project.
 
 ## Acknowledgements

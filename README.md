@@ -1,62 +1,83 @@
+<div align="center">
+
+<img src="docs/images/boss-milestones-banner.png" alt="A crowned red skull overlooking a gold boss-kill leaderboard" width="100%">
+
 # Boss Milestones: Rank Among Friends
 
-Compare boss kills with friends, climb the leaderboard, and celebrate milestones.
+**Track the grind. Celebrate the milestones. See how you rank against your friends.**
 
-## Getting started
+![Version 1.1.0](https://img.shields.io/badge/version-1.1.0-cb9a37?style=for-the-badge&labelColor=32151b)
+![RuneLite Plugin](https://img.shields.io/badge/RuneLite-Plugin-7b2632?style=for-the-badge&labelColor=32151b)
 
-1. Search for **Boss Milestones: Rank Among Friends** in RuneLite's **Plugin Hub** and install it.
-2. Keep the game's boss kill-count messages enabled.
-3. Click the **gold skull** sidebar icon to view your progress or select a boss.
-4. Open a boss's **Combat Achievements details** to sync its lifetime kill count.
-5. Set a lifetime goal in the sidebar, or enable **Friends hiscore leaderboard** for friendly competition.
+</div>
 
-## Features
+Boss Milestones keeps a running record of your boss kills and gives the long grind something to celebrate. Follow your session, chase a personal target, and compare public hiscores with the friends you choose to include.
 
-- **Three kill counters:** this session, since the plugin was enabled, and lifetime total.
-- **Personal goals:** set a lifetime target for each boss, with a progress bar and completion celebration. Enter **0** to clear a goal.
-- **Escalating jingles:** bigger milestones earn bigger celebrations.
-- **Milestone fireworks:** colourful bursts appear across the game view when a milestone is reached. Bigger milestones bring larger displays, and personal goals trigger fireworks too.
-- **Friends leaderboard:** compare public boss kills with your actual friends list, including offline friends. Your own row is highlighted in green.
-- **Friend to beat:** see how many kills you need to overtake the next friend.
-- **Saved progress:** goals and tracked kills persist per boss and account profile across restarts.
+## At a glance
 
-## Celebrations
+| Keep the count | Chase your next goal | Climb the friends board |
+|:---:|:---:|:---:|
+| Session, since-activation and lifetime boss totals | Personal targets, milestone jingles and in-game fireworks | Public boss hiscores for your RuneScape friends |
 
-| Milestone | Sound |
-| --- | --- |
-| First 10 tracked kills | Little Victory |
-| First 25 tracked kills | Golden Steps |
-| Every 50 tracked kills | Little Victory |
-| Every 250 tracked kills | Champion Fanfare |
-| Every 1,000 tracked kills | Legendary Victory |
-| Personal goal reached | Goal Complete |
-| Optional: every 10 or 25 session kills | Session Spark |
+## Your panel, your progress
 
-Milestones use **kills tracked since activation**, not historical lifetime kills. Only one sound plays per kill: personal goals take priority, followed by the largest milestone. All six sounds are original.
+The themed side panel keeps the selected boss, your totals, next milestone and personal goal together. Open it to choose a boss, set a target or refresh the friends leaderboard.
+
+<div align="center">
+
+<img src="docs/images/side-panel-guide.png" alt="Annotated guide to the Boss Milestones Kraken side panel: kill totals, progress bars, goal controls and friends leaderboard" width="100%">
+
+*A visual guide to the side panel, using Kraken as the example.*
+
+</div>
+
+## Settings at a glance
+
+Use the settings to choose how kills count, tune celebrations and shape the on-screen overlay. Testing controls stay in their own expandable **Debug** section.
+
+<div align="center">
+
+<img src="docs/images/settings-guide.png" alt="Annotated guide to tracking, celebration, overlay and debug settings" width="100%">
+
+*Tracking and celebration controls are followed by the expandable Overlay and Debug groups.*
+
+</div>
+
+## Milestones worth celebrating
+
+Celebrations scale with the achievement: the first 10 and 25 kills get their own sounds, then bigger fanfares arrive at 250 and 1,000 kills. Personal goals have a celebration of their own, and optional session encouragement can keep shorter grinds lively. Fireworks spread across the game view when a milestone or personal goal is reached.
+
+Choose whether milestones count **Since activation** (default), **This session**, or **All-time kills**. Personal goals have their own basis setting, so your goals can be independent of milestone celebrations. Changing a basis or syncing a total won’t replay old rewards.
 
 ## Make it yours
 
-- **Play milestone sound:** mute celebrations while keeping chat messages.
-- **Milestone fireworks:** turn the on-screen display on or off; enabled by default.
-- **Session encouragement:** optional rewards every 10 or 25 session kills.
-- **Always on GUI:** keep the overlay visible before your first kill and while idle.
-- **GUI timeout:** hide the overlay after 1–60 minutes without a kill; default **5 minutes**.
-- **Show goals on overlay:** switch between the fuller display and a compact counter.
-- **Excluded bosses:** enter comma-separated names, such as `Sarachnis, Vorkath`.
-- **Loot backup:** count recognised boss loot events when a kill-count message is missing.
+The expandable **Overlay** settings let you tune how much progress appears on screen and when it appears.
 
-The overlay normally appears after your first tracked kill. Session counts reset on logout or disabling the plugin; saved progress remains. World hops preserve session counts.
+- Pick **Full**, **Compact** or **Minimal** layout.
+- Show the overlay always, or let it hide after a configurable idle timeout.
+- Choose whether to show personal goals on the overlay; the Minimal layout keeps the goal as a single extra line.
+- Adjust celebration volume, optional session encouragement and milestone fireworks.
+- Exclude bosses by entering comma-separated names, or enable loot backup for supported drops.
+- Find testing and diagnostic controls in the separate **Debug** section.
 
-## Totals and friend scores
+## Getting started
 
-**Unknown** means no lifetime total has been obtained. Open the individual boss's Combat Achievements details and look for a sync confirmation. A **~** marks a loot-based estimate. Syncing does not add historical kills to milestone progress or replay celebrations.
+1. Install **Boss Milestones: Rank Among Friends** from the RuneLite Plugin Hub.
+2. Keep in-game boss kill-count messages enabled so kills can be tracked reliably.
+3. Open the red skull and gold podium sidebar icon, then choose **Follow current boss** or select one from the list.
+4. To sync a lifetime total, open that boss’s individual **Combat Achievements** details and look for the confirmation message.
+5. Set a personal goal in the side panel. Enable **Friends hiscore leaderboard** in settings to compare with friends.
 
-The friends leaderboard is **off by default**. Enabling it sends queried usernames to the official OSRS hiscores service, which also receives your IP address. Results load while the sidebar is open and are cached for up to **10 minutes**. **Refresh friends** updates the roster and reloads missing or expired results. These are public main-game totals, not live scores; unranked or unavailable results are not treated as zero.
+## Counters, sync and privacy
 
-## Support
+Session kills reset when you log out or disable the plugin; world hops preserve them. Since-activation and saved lifetime totals persist across restarts. A lifetime total shown as **Unknown** has not been synced or estimated yet; a `~` marks a loot-based estimate.
 
-Found a bug? [Open an issue](https://github.com/RYANOATES/Boss-Kill-Milestones/issues) with the boss name, what happened, and a screenshot if possible.
+The friends leaderboard is **off by default**. When enabled, queried usernames are sent to the official OSRS hiscores service, which also receives your IP address. Scores are public main-game totals, cached for up to 10 minutes while the side panel is open; unavailable or unranked results are not counted as zero.
 
-[BSD-2-Clause licence](LICENSE) · [Asset credits](ASSET-NOTICES.md)
+## Help and credits
+
+Found an issue? [Open a GitHub issue](https://github.com/RYANOATES/Boss-Kill-Milestones/issues) with the boss name, what happened and a screenshot if possible.
+
+[BSD-2-Clause licence](LICENSE) · [Asset notices and audio credits](ASSET-NOTICES.md)
 
 *Thanks Cow and the Lucipurr boys for support and the idea.*
