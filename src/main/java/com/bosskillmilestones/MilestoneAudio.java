@@ -49,12 +49,19 @@ final class MilestoneAudio
 
 	synchronized void play(Celebration celebration)
 	{
-		if (worker == null) return;
-		int requestedGeneration = generation;
-		worker.execute(() -> loadAndPlay(celebration.resource, requestedGeneration));
+		play(celebration, 100);
 	}
 
-	private void loadAndPlay(String resource, int requestedGeneration)
+	synchronized void play(Celebration celebration, int volumePercent)
+	{
+		int volume = Math.max(0, Math.min(100, volumePercent));
+		if (worker == null || volume == 0) return;
+		float gain = (float) (20 * Math.log10(volume / 100.0));
+		int requestedGeneration = generation;
+		worker.execute(() -> loadAndPlay(celebration.resource, requestedGeneration, gain));
+	}
+
+	private void loadAndPlay(String resource, int requestedGeneration, float gain)
 	{
 		synchronized (this)
 		{
@@ -64,7 +71,7 @@ final class MilestoneAudio
 		{
 			// Resource decoding and playback stay off the client thread. RuneLite owns
 			// the audio line lifecycle; an already-started cue finishes naturally.
-			audioPlayer.play(MilestoneAudio.class, resource, 0f);
+			audioPlayer.play(MilestoneAudio.class, resource, gain);
 		}
 		catch (Exception ex)
 		{

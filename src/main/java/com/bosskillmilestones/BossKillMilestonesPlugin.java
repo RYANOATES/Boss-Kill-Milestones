@@ -54,23 +54,48 @@ public class BossKillMilestonesPlugin extends Plugin
 		final int saved;
 		final String total;
 		final int goal;
+		final BossKillMilestonesConfig.MilestoneBasis basis;
+		final BossKillMilestonesConfig.MilestoneBasis goalBasis;
 		Progress(String name, int session, int saved, String total)
 		{
 			this(name, session, saved, total, 0);
 		}
 		Progress(String name, int session, int saved, String total, int goal)
 		{
+			this(name, session, saved, total, goal, BossKillMilestonesConfig.MilestoneBasis.SINCE_ACTIVATION);
+		}
+		Progress(String name, int session, int saved, String total, int goal, BossKillMilestonesConfig.MilestoneBasis basis)
+		{
+			this(name, session, saved, total, goal, basis, BossKillMilestonesConfig.MilestoneBasis.ALL_TIME);
+		}
+		Progress(String name, int session, int saved, String total, int goal, BossKillMilestonesConfig.MilestoneBasis basis,
+			BossKillMilestonesConfig.MilestoneBasis goalBasis)
+		{
+			this.goalBasis = goalBasis;
+			this.basis = basis;
 			this.goal = goal;
 			this.name = name;
 			this.session = session;
 			this.saved = saved;
 			this.total = total;
 		}
+		Integer milestoneCount() { return basis.count(saved, session, GrindProgress.total(total)); }
+		Integer goalCount() { return goalBasis.count(saved, session, GrindProgress.total(total)); }
+		String goalCountText()
+		{
+			return goalBasis == BossKillMilestonesConfig.MilestoneBasis.ALL_TIME ? total : String.valueOf(goalCount());
+		}
+		String nextMilestoneText()
+		{
+			Integer count = milestoneCount();
+			return count == null ? "Sync lifetime total" : (GrindProgress.nextMilestone(count) - count) + " away";
+		}
 	}
 
 	Progress getProgress()
 	{
-		return progress;
+		Progress current = progress;
+		return new Progress(current.name, current.session, current.saved, current.total, current.goal, config.milestoneBasis(), config.personalGoalBasis());
 	}
 
 	boolean isCounterVisible()
@@ -203,9 +228,15 @@ public class BossKillMilestonesPlugin extends Plugin
 
 		Integer target = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-" + key, int.class);
 		Integer celebrated = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, int.class);
-		boolean goalReached = Celebration.goalReached(target == null ? 0 : target, total, celebrated);
-		if (goalReached) configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, target);
-		Celebration celebration = Celebration.select(sinceEnabled, sessionKills.getOrDefault(key, 0),
+		Integer goalCount = config.personalGoalBasis().count(sinceEnabled, sessionKills.getOrDefault(key, 0), total);
+		boolean lifetimeGoal = config.personalGoalBasis() == BossKillMilestonesConfig.MilestoneBasis.ALL_TIME;
+		// Local counters advance by one per recorded kill. Crossing the target avoids
+		// replaying a goal after changing basis and lets session goals repeat after logout.
+		boolean goalReached = lifetimeGoal ? Celebration.goalReached(target == null ? 0 : target, goalCount, celebrated)
+			: target != null && target > 0 && target.equals(goalCount);
+		if (goalReached && lifetimeGoal) configManager.setRSProfileConfiguration(PROFILE_GROUP, "goal-celebrated-" + key, target);
+		Integer milestoneCount = config.milestoneBasis().count(sinceEnabled, sessionKills.getOrDefault(key, 0), total);
+		Celebration celebration = Celebration.select(milestoneCount == null ? 0 : milestoneCount, sessionKills.getOrDefault(key, 0),
 			config.sessionCelebrations().interval, goalReached);
 		if (celebration != null)
 		{
@@ -213,15 +244,19 @@ public class BossKillMilestonesPlugin extends Plugin
 			{
 				fireworksOverlay.launch(celebration);
 			}
-			String introduction = celebration == Celebration.GOAL ? "Personal goal reached: " + target + " " + bossName + "! "
+			String introduction = celebration == Celebration.GOAL ? "Personal goal reached: " + target + " " + bossName + " (" + config.personalGoalBasis() + ")! "
 				: celebration == Celebration.SESSION ? "Session milestone: " + sessionKills.get(key) + " " + bossName + " this session! "
 				: celebration == Celebration.THOUSAND || celebration == Celebration.TWO_FIFTY ? celebration.title + "! " : "";
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", introduction + "You've killed " + sinceEnabled + " " + bossName
-				+ " since Boss Milestones: Rank Among Friends was enabled!" + (total == null ? " (lifetime total unconfirmed)"
+			String countMessage = config.milestoneBasis() == BossKillMilestonesConfig.MilestoneBasis.ALL_TIME
+				? "You've reached " + (total == null ? "an unknown number of" : total) + " " + bossName + (estimated ? " estimated all-time kills!" : " all-time kills!")
+				: config.milestoneBasis() == BossKillMilestonesConfig.MilestoneBasis.SESSION
+				? "You've killed " + sessionKills.get(key) + " " + bossName + " this session!"
+				: "You've killed " + sinceEnabled + " " + bossName + " since Boss Milestones: Rank Among Friends was enabled!";
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", introduction + countMessage + (total == null ? " (lifetime total unconfirmed)"
 				: " (" + total + (estimated ? " estimated total)" : " total)")), null);
 			if (config.playMilestoneSound())
 			{
-				milestoneAudio.play(celebration);
+				milestoneAudio.play(celebration, config.soundVolume());
 			}
 		}
 	}
@@ -515,7 +550,7 @@ public class BossKillMilestonesPlugin extends Plugin
 		String totalText = total == null ? "Unknown" : total.toString();
 		if (estimate != null && !estimate.equals(total)) totalText = "~" + estimate;
 		Integer goal = configManager.getRSProfileConfiguration(PROFILE_GROUP, "goal-" + key, int.class);
-		return new Progress(boss, sessionKills.getOrDefault(key, 0), saved == null ? 0 : saved, totalText, goal == null ? 0 : goal);
+		return new Progress(boss, sessionKills.getOrDefault(key, 0), saved == null ? 0 : saved, totalText, goal == null ? 0 : goal, config.milestoneBasis(), config.personalGoalBasis());
 	}
 
 	void saveGoal(String boss, int goal)

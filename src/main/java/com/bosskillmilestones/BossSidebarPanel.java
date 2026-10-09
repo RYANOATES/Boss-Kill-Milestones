@@ -12,13 +12,17 @@ import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 
 final class BossSidebarPanel extends PluginPanel
 {
 	private static final String FOLLOW = "Follow current boss";
+	private static final Color BACKGROUND = new Color(23, 15, 20);
+	private static final Color SURFACE = new Color(47, 27, 33);
+	private static final Color GOLD = new Color(240, 187, 88);
+	private static final Color MUTED = new Color(184, 173, 157);
+	private static final Color EDGE = new Color(158, 111, 46);
 	private static final BufferedImage ICON = ImageUtil.loadImageResource(BossSidebarPanel.class, "/boss-milestones-icon.png");
 	private final JLabel title = new JLabel("Choose a boss", SwingConstants.CENTER);
 	private final JLabel image = new JLabel(new ImageIcon(icon(96)), SwingConstants.CENTER);
@@ -51,12 +55,27 @@ final class BossSidebarPanel extends PluginPanel
 		this.activate = activate;
 		this.deactivate = deactivate;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		setBorder(BorderFactory.createEmptyBorder(12, 10, 12, 10));
-		setBackground(ColorScheme.DARK_GRAY_COLOR);
+		setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 2, 0, 2, EDGE),
+			BorderFactory.createEmptyBorder(12, 8, 12, 8)));
+		setBackground(BACKGROUND);
+		JLabel brand = new JLabel("BOSS MILESTONES", new ImageIcon(icon(28)), SwingConstants.CENTER);
+		brand.setFont(brand.getFont().deriveFont(Font.BOLD, 13f));
+		brand.setForeground(GOLD);
+		brand.setIconTextGap(8);
+		brand.setOpaque(true);
+		brand.setBackground(SURFACE);
+		brand.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
+		brand.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, GOLD),
+			BorderFactory.createEmptyBorder(8, 4, 8, 4)));
+		add(brand);
+		add(Box.createVerticalStrut(10));
 		JComboBox<String> bosses = new JComboBox<>();
 		bosses.addItem(FOLLOW);
 		for (String name : BossNames.all()) bosses.addItem(name);
 		bosses.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+		bosses.setBackground(SURFACE);
+		bosses.setForeground(GOLD);
+		bosses.setBorder(BorderFactory.createLineBorder(EDGE));
 		bosses.addActionListener(event -> selection.accept(FOLLOW.equals(bosses.getSelectedItem()) ? null : (String) bosses.getSelectedItem()));
 		add(bosses);
 		add(Box.createVerticalStrut(14));
@@ -66,13 +85,18 @@ final class BossSidebarPanel extends PluginPanel
 		add(title);
 		image.setAlignmentX(CENTER_ALIGNMENT);
 		image.setPreferredSize(new Dimension(110, 110));
+		image.setOpaque(true);
+		image.setBackground(SURFACE);
+		image.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(GOLD, 2),
+			BorderFactory.createEmptyBorder(8, 8, 8, 8)));
 		add(image);
+		add(Box.createVerticalStrut(10));
 		add(stat("Total kills", total));
 		add(stat("Since activation", saved));
 		add(stat("This session", session));
 		JLabel estimateNote = new JLabel("~ = estimate; Unknown = not synced");
 		estimateNote.setFont(estimateNote.getFont().deriveFont(10f));
-		estimateNote.setForeground(Color.LIGHT_GRAY);
+		estimateNote.setForeground(MUTED);
 		add(estimateNote);
 		add(Box.createVerticalStrut(10));
 		add(milestone);
@@ -81,9 +105,14 @@ final class BossSidebarPanel extends PluginPanel
 		JPanel goalControls = new JPanel(new BorderLayout(5, 0));
 		goalControls.setOpaque(false);
 		goalControls.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-		goalInput.setToolTipText("Lifetime kill target for this boss; 0 clears the goal.");
+		goalInput.setToolTipText("Kill target for this boss using Personal goal basis; 0 clears the goal.");
 		goalControls.add(goalInput, BorderLayout.CENTER);
 		JButton save = new JButton("Set goal");
+		styleButton(save);
+		JFormattedTextField goalText = ((JSpinner.DefaultEditor) goalInput.getEditor()).getTextField();
+		goalText.setBackground(SURFACE);
+		goalText.setForeground(GOLD);
+		goalText.setCaretColor(GOLD);
 		save.addActionListener(event -> {
 			try { goalInput.commitEdit(); saveGoal.accept(shownBoss, (Integer) goalInput.getValue()); }
 			catch (java.text.ParseException ex) { goalInput.setValue(Math.max(0, shownGoal)); }
@@ -96,13 +125,20 @@ final class BossSidebarPanel extends PluginPanel
 		add(Box.createVerticalStrut(18));
 		JLabel heading = new JLabel("Friends leaderboard");
 		heading.setFont(heading.getFont().deriveFont(Font.BOLD, 14f));
-		heading.setForeground(Color.WHITE);
+		heading.setForeground(GOLD);
+		heading.setOpaque(true);
+		heading.setBackground(SURFACE);
+		heading.setHorizontalAlignment(SwingConstants.CENTER);
+		heading.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
+		heading.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, GOLD),
+			BorderFactory.createEmptyBorder(8, 4, 8, 4)));
 		add(heading);
 		JLabel subtitle = new JLabel("Main-game lifetime hiscores");
-		subtitle.setForeground(Color.LIGHT_GRAY);
+		subtitle.setForeground(MUTED);
 		add(subtitle);
 		add(Box.createVerticalStrut(6));
 		JButton reload = new JButton("Refresh friends");
+		styleButton(reload);
 		reload.setToolTipText("Refresh your friends list; reuse hiscore results less than 10 minutes old.");
 		reload.addActionListener(event -> refresh.run());
 		add(reload);
@@ -110,7 +146,8 @@ final class BossSidebarPanel extends PluginPanel
 		status.setLineWrap(true);
 		status.setWrapStyleWord(true);
 		status.setBackground(getBackground());
-		status.setForeground(Color.LIGHT_GRAY);
+		status.setForeground(MUTED);
+		status.setFont(status.getFont().deriveFont(11f));
 		status.setRows(3);
 		status.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
 		status.setMinimumSize(new Dimension(0, 40));
@@ -124,19 +161,35 @@ final class BossSidebarPanel extends PluginPanel
 				java.awt.Component cell = super.getTableCellRendererComponent(grid, value, selected, focused, row, column);
 				cell.setForeground(hasOwnSummary && grid.convertRowIndexToModel(row) == 0
 					? new Color(100, 230, 120) : selected ? grid.getSelectionForeground() : grid.getForeground());
+				cell.setBackground(selected ? grid.getSelectionBackground()
+					: hasOwnSummary && grid.convertRowIndexToModel(row) == 0 ? new Color(29, 53, 36)
+					: row % 2 == 0 ? SURFACE : BACKGROUND);
+				setHorizontalAlignment(column == 0 ? SwingConstants.CENTER : column == 2 ? SwingConstants.RIGHT : SwingConstants.LEFT);
+				setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
 				return cell;
 			}
 		});
 		rows.setRowHeight(24);
 		rows.setFillsViewportHeight(true);
-		rows.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		rows.setBackground(BACKGROUND);
 		rows.setForeground(Color.WHITE);
-		rows.setGridColor(ColorScheme.DARK_GRAY_COLOR);
+		rows.setShowGrid(false);
+		rows.setSelectionBackground(new Color(78, 59, 35));
+		rows.setSelectionForeground(Color.WHITE);
+		DefaultTableCellRenderer header = new DefaultTableCellRenderer();
+		header.setOpaque(true);
+		header.setBackground(SURFACE);
+		header.setForeground(GOLD);
+		header.setFont(rows.getFont().deriveFont(Font.BOLD));
+		header.setBorder(BorderFactory.createEmptyBorder(6, 4, 6, 4));
+		rows.getTableHeader().setDefaultRenderer(header);
 		rows.getTableHeader().setReorderingAllowed(false);
 		rows.getColumnModel().getColumn(0).setMaxWidth(30);
 		rows.getColumnModel().getColumn(1).setPreferredWidth(110);
 		rows.getColumnModel().getColumn(2).setPreferredWidth(85);
 		JScrollPane scroll = new JScrollPane(rows);
+		scroll.setBorder(BorderFactory.createLineBorder(EDGE));
+		scroll.getViewport().setBackground(BACKGROUND);
 		scroll.setColumnHeaderView(rows.getTableHeader());
 		scroll.setPreferredSize(new Dimension(210, 250));
 		scroll.setMinimumSize(new Dimension(0, 150));
@@ -148,7 +201,7 @@ final class BossSidebarPanel extends PluginPanel
 		thanks.setLineWrap(true);
 		thanks.setWrapStyleWord(true);
 		thanks.setOpaque(false);
-		thanks.setForeground(Color.LIGHT_GRAY);
+		thanks.setForeground(MUTED);
 		thanks.setFont(thanks.getFont().deriveFont(10f));
 		thanks.setRows(3);
 		thanks.setMinimumSize(new Dimension(0, 42));
@@ -161,15 +214,26 @@ final class BossSidebarPanel extends PluginPanel
 	private JPanel stat(String label, JLabel value)
 	{
 		JPanel row = new JPanel(new BorderLayout());
-		row.setBackground(getBackground());
+		row.setBackground(SURFACE);
 		row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-		row.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
+		row.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, EDGE),
+			BorderFactory.createEmptyBorder(4, 8, 4, 8)));
 		JLabel caption = new JLabel(label);
-		caption.setForeground(Color.LIGHT_GRAY);
-		value.setForeground(Color.WHITE);
+		caption.setForeground(MUTED);
+		value.setForeground(GOLD);
+		value.setFont(value.getFont().deriveFont(Font.BOLD));
 		row.add(caption, BorderLayout.WEST);
 		row.add(value, BorderLayout.EAST);
 		return row;
+	}
+
+	private static void styleButton(JButton button)
+	{
+		button.setBackground(SURFACE);
+		button.setForeground(GOLD);
+		button.setFocusPainted(false);
+		button.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(EDGE),
+			BorderFactory.createEmptyBorder(6, 10, 6, 10)));
 	}
 
 	boolean showProgress(BossKillMilestonesPlugin.Progress progress)
@@ -180,13 +244,17 @@ final class BossSidebarPanel extends PluginPanel
 			shownGoal = progress.goal;
 			goalInput.setValue(progress.goal);
 		}
-		long next = GrindProgress.nextMilestone(progress.saved);
-		milestone.setValue((int) (100.0 * progress.saved / next));
-		milestone.setString("Next jingle: " + progress.saved + " / " + next);
-		Integer lifetime = GrindProgress.total(progress.total);
+		Integer count = progress.milestoneCount();
+		long next = GrindProgress.nextMilestone(count == null ? 0 : count);
+		milestone.setValue(count == null ? 0 : (int) (100.0 * count / next));
+		milestone.setString(count == null ? "Sync lifetime total" : "Next jingle: " + count + " / " + next);
+		milestone.setToolTipText("Milestone basis: " + progress.basis);
+		Integer lifetime = progress.goalCount();
+		personal.setToolTipText("Personal goal basis: " + progress.goalBasis);
+		goalInput.setToolTipText("Target based on " + progress.goalBasis + "; 0 clears the goal.");
 		personal.setValue(progress.goal > 0 && lifetime != null ? (int) Math.min(100, 100.0 * lifetime / progress.goal) : 0);
-		personal.setString(progress.goal <= 0 ? "Set a lifetime goal below" : lifetime == null ? "Goal " + progress.goal + " — sync total"
-			: lifetime >= progress.goal ? "Goal reached! " + progress.goal : "Goal: " + progress.total + " / " + progress.goal);
+		personal.setString(progress.goal <= 0 ? "Set a goal below" : lifetime == null ? "Goal " + progress.goal + " — sync total"
+			: lifetime >= progress.goal ? "Goal reached! " + progress.goal : "Goal: " + progress.goalCountText() + " / " + progress.goal);
 		shownBoss = progress.name;
 		title.setText(progress.name);
 		title.setToolTipText(progress.name);
@@ -221,7 +289,8 @@ final class BossSidebarPanel extends PluginPanel
 		JProgressBar bar = new JProgressBar(0, 100);
 		bar.setStringPainted(true);
 		bar.setForeground(color);
-		bar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		bar.setBackground(SURFACE);
+		bar.setBorder(BorderFactory.createLineBorder(EDGE));
 		bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
 		return bar;
 	}

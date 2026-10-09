@@ -82,4 +82,27 @@ public class MilestoneAudioTest
 		assertNull(MilestoneAudio.class.getResource("/audio/community-claps.wav"));
 		assertNull(MilestoneAudio.class.getResource("/audio/wow-thats-amazing.wav"));
 	}
+
+	@Test public void volumeMutesAndScalesPlayback() throws Exception
+	{
+		LinkedBlockingQueue<Float> gains = new LinkedBlockingQueue<>();
+		MilestoneAudio audio = new MilestoneAudio(new AudioPlayer()
+		{
+			@Override public void play(Class<?> owner, String path, float gain) { gains.add(gain); }
+		});
+		try
+		{
+			audio.start();
+			audio.play(Celebration.TEN, 0);
+			audio.play(Celebration.TEN, -10);
+			audio.play(Celebration.GOAL, 50);
+			Float half = gains.poll(3, TimeUnit.SECONDS);
+			assertNotNull(half);
+			assertEquals(-6.0206f, half, 0.001f);
+			audio.play(Celebration.SESSION, 150);
+			assertEquals(Float.valueOf(0f), gains.poll(3, TimeUnit.SECONDS));
+			assertTrue(gains.isEmpty());
+		}
+		finally { audio.stop(); }
+	}
 }
